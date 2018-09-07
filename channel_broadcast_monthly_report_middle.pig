@@ -149,9 +149,14 @@ channel_list_00 = FOREACH contents_list GENERATE
 channel_list = DISTINCT channel_list_00;
 
 -- L2) ユーザー属性情報
-user_table_00 = LOAD '/user/hadoop/summary/niconicodb/niconico_user_table/current' USING parquet.pig.ParquetLoader();
-user_table = FOREACH user_table_00 GENERATE
+user_table = LOAD '/user/hadoop/summary/niconicodb/niconico_user_table/current' USING parquet.pig.ParquetLoader();
+user_table = FOREACH user_table GENERATE
     user_id AS huid,
+    sex,
+    (birth_datetime IS NULL OR birth_datetime == '0000-00-00' OR SIZE(birth_datetime) != 10  ? '3000-01-01' : birth_datetime) AS birth_datetime,
+    prefecture;
+user_table = FOREACH user_table GENERATE
+    huid,
     sex,
     ToDate(CONCAT(birth_datetime, ' 00:00:00'), 'yyyy-MM-dd HH:mm:ss') AS birth_datetime,
     prefecture;
